@@ -9,7 +9,7 @@ import {
 
 export const doesContractExist = async (network: NETWORK, address: string) => {
   try {
-    const result = await axios.get(
+    const result = await fetch(
       `${urlByNetwork[network]}/api/contract/${address}`
     );
     return result.status === 200;
@@ -20,9 +20,7 @@ export const doesContractExist = async (network: NETWORK, address: string) => {
 
 export const doesClassExist = async (network: NETWORK, address: string) => {
   try {
-    const result = await axios.get(
-      `${urlByNetwork[network]}/api/class/${address}`
-    );
+    const result = await fetch(`${urlByNetwork[network]}/api/class/${address}`);
     return result.status === 200;
   } catch {
     return false;
