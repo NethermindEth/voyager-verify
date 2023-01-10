@@ -31,6 +31,7 @@
     "inquirer-fuzzy-path": "^2.3.0",
     "lodash": "^4.17.21",
     "minimist": "^1.2.7",
+    "node-fetch": "^3.3.0",
     "ts-node": "^10.9.1"
   },
   "devDependencies": {
