@@ -35,8 +35,8 @@ export const withSpinner = async (
 };
 
 export const extractCairoContractName = (name: string) => {
-  const parsedPath = path.parse(name)
-  return parsedPath.name
+  const parsedPath = path.parse(name);
+  return parsedPath.name;
 };
 
 export const extractFilesForVerification = (contractPath: string) => {
@@ -95,11 +95,111 @@ export const extractNileForVerification = () => {
 export const extractProtostarForVerification = () => {
   if (fs.existsSync(PROTOSTAR_FILE_NAME)) {
     const protostar = TOML.parse(fs.readFileSync(PROTOSTAR_FILE_NAME, "utf-8"));
+
+    if (!protostar) {
+      return null;
+    }
+
     return [
       ...(protostar["protostar.build"]?.["cairo-path"] || []),
       ...(protostar["protostar.shared_command_configs"]?.["cairo-path"] || []),
+      ...(protostar["project"]?.["cairo-path"] || []),
     ];
   } else {
     return null;
   }
+};
+
+type DependencyResult = {
+  dependenciesFullPaths: string[];
+  files: any[];
+  checkedDependencies: string[];
+  notFound: string[];
+};
+
+const convertCairoImportToFilePath = (cairoImportStr: string) => {
+  const el = cairoImportStr.split(".");
+  const filePath = path.join(...el);
+
+  return filePath + ".cairo";
+};
+
+const extractDependenciesFromCairoFile = (cairoFilePath: string) => {
+  const IMPORT_REGEX = /^from (?!starkware)(.*) import/gm;
+  const content = fs.readFileSync(cairoFilePath, "utf-8");
+  const matches = [...content.matchAll(IMPORT_REGEX)];
+  if (matches.length === 0) {
+    return [];
+  }
+
+  const dependencies = matches.map((match) => {
+    return match[1];
+  });
+  return dependencies;
+};
+
+export const extractAllDependenciesFullPathFromMain = (
+  mainCairoFilePath: string,
+  cairoPaths: string[]
+): DependencyResult => {
+  const dependenciesFullPaths: string[] = [];
+  const checkedDependencies: string[] = [];
+  const files = [];
+  const notFound: string[] = [];
+
+  const extractDependenciesFullPath = (cairoFilePath: string) => {
+    const fileDependencies = extractDependenciesFromCairoFile(cairoFilePath);
+
+    if (fileDependencies.length === 0) {
+      return;
+    }
+
+    for (let i = 0; i < fileDependencies.length; i++) {
+      const dependency = fileDependencies[i];
+      if (checkedDependencies.some((e) => e === dependency)) {
+        continue;
+      }
+
+      let isFound = false;
+      const fp = convertCairoImportToFilePath(dependency);
+
+      for (let i = 0; i < cairoPaths.length; i++) {
+        const cairoPath = cairoPaths[i];
+        const fullPath = path.join(cairoPath, fp);
+        const isExist = fs.existsSync(fullPath);
+
+        if (isExist) {
+          isFound = true;
+          checkedDependencies.push(dependency);
+          dependenciesFullPaths.push(fullPath);
+          extractDependenciesFullPath(fullPath);
+
+          const contractContents = fs.readFileSync(fullPath, "utf-8");
+          const contract = { path: fp, content: contractContents };
+          files.push(contract);
+
+          break;
+        }
+      }
+
+      if (!isFound) {
+        notFound.push(fp);
+      }
+    }
+  };
+
+
+
+  const contractContents = fs.readFileSync(mainCairoFilePath, "utf-8");
+  const contract = { path: mainCairoFilePath, content: contractContents };
+  files.push(contract);
+
+  extractDependenciesFullPath(mainCairoFilePath);
+
+  return {
+    dependenciesFullPaths,
+    files,
+    checkedDependencies,
+    notFound,
+  };
 };
