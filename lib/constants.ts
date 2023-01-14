@@ -1,6 +1,7 @@
 export enum NETWORK { 
     mainnet = 'mainnet',
     goerli = 'goerli',
+    goerli2 = 'goerli2',
     integration = 'integration' 
 }
 export const networkNames = Object.values(NETWORK)
@@ -8,6 +9,7 @@ export const networkNames = Object.values(NETWORK)
 export const urlByNetwork = {
     mainnet: 'https://voyager.online',
     goerli: 'https://goerli.voyager.online',
+    goerli2: 'https://goerli-2.voyager.online/',
     integration: 'https://integration.voyager.online'
 }
 
