@@ -75,7 +75,7 @@ export const enterCompilerVersion = async () => {
   const prompt = await inquirer.prompt({
     name: "version",
     type: "list",
-    choices: compilerVersions,
+    choices: compilerVersions.reverse(),
     message: "Choose the compiler version that you wish to use:",
     validate: validateCompilerVersion,
   });
