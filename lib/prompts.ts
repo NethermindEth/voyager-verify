@@ -15,6 +15,7 @@ import {
   validateNonEmptyString,
 } from "./validators.js";
 import {
+  extractAllDependenciesFullPathFromMain,
   extractCairoContractName,
   extractFilesForVerification,
   extractNileForVerification,
@@ -74,7 +75,7 @@ export const enterCompilerVersion = async () => {
   const prompt = await inquirer.prompt({
     name: "version",
     type: "list",
-    choices: compilerVersions,
+    choices: compilerVersions.reverse(),
     message: "Choose the compiler version that you wish to use:",
     validate: validateCompilerVersion,
   });
@@ -154,16 +155,15 @@ export const enterContractToVerifyWithValidDependencies = async () => {
         const files = await withSpinner(
           "Checking for Protostar dependencies..",
           new Promise((resolve, reject) => {
-            const resolvedPaths = protostar.map((path) =>
-              extractFilesForVerification(path)
+            const dependencies = extractAllDependenciesFullPathFromMain(
+              contractPath,
+              protostar
             );
-            const notFound = resolvedPaths.flatMap(
-              (resolved) => resolved.notFound
-            );
-            if (notFound.length) {
-              reject(notFound);
+
+            if (dependencies.notFound.length > 0) {
+              reject(dependencies.notFound);
             } else {
-              resolve(resolvedPaths.flatMap((resolved) => resolved.files));
+              resolve(dependencies.files);
             }
           })
         );
