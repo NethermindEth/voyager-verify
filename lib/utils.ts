@@ -188,10 +188,11 @@ export const extractAllDependenciesFullPathFromMain = (
     }
   };
 
-
-
   const contractContents = fs.readFileSync(mainCairoFilePath, "utf-8");
-  const contract = { path: mainCairoFilePath, content: contractContents };
+  const contract = {
+    path: extractCairoContractName(mainCairoFilePath) + ".cairo",
+    content: contractContents,
+  };
   files.push(contract);
 
   extractDependenciesFullPath(mainCairoFilePath);

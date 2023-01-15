@@ -132,17 +132,24 @@ export const enterContractToVerifyWithValidDependencies = async () => {
         const files = await withSpinner(
           "Checking for Nile dependencies..",
           new Promise((resolve, reject) => {
-            const { files, notFound } = extractFilesForVerification(nile);
-            if (notFound.length) {
-              reject(notFound);
+            const dependencies = extractAllDependenciesFullPathFromMain(
+              contractPath,
+              [nile]
+            );
+
+            if (dependencies.notFound.length > 0) {
+              reject(dependencies.notFound);
             } else {
-              resolve(files);
+              resolve(dependencies.files);
             }
           })
         );
 
         if (files) {
-          return { contract: contractPath, files };
+          return {
+            contract: extractCairoContractName(contractPath) + ".cairo",
+            files,
+          };
         }
       }
     } catch (err) {
@@ -169,7 +176,10 @@ export const enterContractToVerifyWithValidDependencies = async () => {
         );
 
         if (files) {
-          return { contract: contractPath, files };
+          return {
+            contract: extractCairoContractName(contractPath) + ".cairo",
+            files,
+          };
         }
       }
     } catch (err) {
