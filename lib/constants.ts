@@ -26,6 +26,8 @@ export enum COMPILER_VERSION {
     "0.9.1" = "0.9.1",
     "0.10.0" = "0.10.0",
     "0.10.1" = "0.10.1",
+    "0.10.2" = "0.10.2",
+    "0.10.3" = "0.10.3",
 }
 export const compilerVersions = Object.values(COMPILER_VERSION)
 
