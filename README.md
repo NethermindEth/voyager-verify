@@ -8,6 +8,9 @@ A CLI Verifier Package for **[Voyager](https://voyager.online)**, the block expl
 
 ![GUI Verify](https://raw.githubusercontent.com/NethermindEth/voyager-verify/master/assets/gui-verify.png)
 
+## Requirements
+- [nodeJs](https://nodejs.org/en/)
+
 ## Installation
 
 ```
