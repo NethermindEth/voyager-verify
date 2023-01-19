@@ -153,7 +153,8 @@ export const enterContractToVerifyWithValidDependencies = async () => {
         }
       }
     } catch (err) {
-      throw new Error(`Nile was not resolved! Reason: ${err}`);
+      console.log(chalk.red(`Nile was not resolved! Reason: ${err}`));
+      console.log(chalk.red("Trying other verification methods"));
     }
 
     try {
