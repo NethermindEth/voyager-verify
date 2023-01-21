@@ -134,7 +134,7 @@ export const enterContractToVerifyWithValidDependencies = async () => {
           new Promise((resolve, reject) => {
             const dependencies = extractAllDependenciesFullPathFromMain(
               contractPath,
-              [nile]
+              [nile, "contracts", "."]
             );
 
             if (dependencies.notFound.length > 0) {
