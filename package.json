@@ -4,6 +4,9 @@
   "bugs": {
     "url": "https://github.com/NethermindEth/voyager-verify/issues"
   },
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NethermindEth/voyager-verify.git"
