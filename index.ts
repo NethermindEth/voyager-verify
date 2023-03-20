@@ -29,12 +29,25 @@ import { withSpinner } from "./lib/utils.js";
   );
 
   try {
-    const network: NETWORK = await enterNetwork()
-    const address: string = await enterExistingClassOrContractAddress(network)
-    const version: COMPILER_VERSION = await enterCompilerVersion()
-    const license: LICENSE = await enterLicense()
-    const isAccount: boolean = await enterIsAccountContract()
-    const { contract, files } = await enterContractToVerifyWithValidDependencies()
+    const network: NETWORK = await enterNetwork();
+    const address: string = await enterExistingClassOrContractAddress(network);
+    const version: COMPILER_VERSION = await enterCompilerVersion();
+    const license: LICENSE = await enterLicense();
+    const isAccount: boolean = await enterIsAccountContract();
+    const { contract, files } = <{ contract: any; files: any[] }>(
+      await enterContractToVerifyWithValidDependencies()
+    );
+
+    const fileSet = new Set<string>();
+    const uniqueFiles = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (fileSet.has(file.path)) {
+        continue;
+      }
+      fileSet.add(file.path);
+      uniqueFiles.push(file);
+    }
 
     const contractName: string = await enterContractName(contract);
     await withSpinner(
@@ -47,7 +60,7 @@ import { withSpinner } from "./lib/utils.js";
         isAccount,
         contractName,
         contract,
-        files
+        uniqueFiles
       )
     );
     console.log(
