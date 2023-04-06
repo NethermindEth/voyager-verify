@@ -104,6 +104,7 @@ export const extractProtostarForVerification = () => {
       ...(protostar["protostar.build"]?.["cairo-path"] || []),
       ...(protostar["protostar.shared_command_configs"]?.["cairo-path"] || []),
       ...(protostar["project"]?.["cairo-path"] || []),
+      ".",
     ];
   } else {
     return null;
