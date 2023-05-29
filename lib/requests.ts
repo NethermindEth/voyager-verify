@@ -8,6 +8,26 @@ import {
   urlByNetwork,
 } from "./constants.js";
 
+export enum VerifyJobStatus {
+  SUBMITTED = 0,
+  COMPILED = 1,
+  COMPILE_FAILED = 2,
+  FAIL = 3,
+  SUCCESS = 4,
+}
+export type VerificationJob = {
+  jobId: string
+  status: VerifyJobStatus
+  classHash: string
+  createdTimestamp: string
+  updatedTimestamp: string
+  address: string
+  contractName: string
+  name: string
+  version: string
+  license: string
+}
+
 export const doesContractExist = async (network: NETWORK, address: string) => {
   try {
     const result = await fetch(
@@ -28,7 +48,7 @@ export const doesClassExist = async (network: NETWORK, address: string) => {
   }
 };
 
-export const verifyContractOrClass = async (
+export const dispatchClassVerificationJob = async (
   network: NETWORK,
   address: string,
   version: COMPILER_VERSION,
@@ -52,9 +72,9 @@ export const verifyContractOrClass = async (
   });
 
   try {
-    const result = await axios({
+    const result = await axios<{jobId: string}>({
       method: "post",
-      url: `${urlByNetwork[network]}/api/contract/${address}/code`,
+      url: `${urlByNetwork[network]}/api/class/${address}/code`,
       data: body,
       headers: {
         "Content-Type": `multipart/form-data boundary=${body.getBoundary()}`,
@@ -64,6 +84,45 @@ export const verifyContractOrClass = async (
 
     return result.data;
   } catch (error) {
-    throw new Error(error.response.data.message);
+    throw new Error(error.response.data.message || error.response.data);
+  }
+};
+
+
+export const pollVerificationStatus = async (
+  network: NETWORK,
+  jobId: string,
+  maxRetries: number = 10
+) => {
+  // Blocking loop that polls every 2 seconds
+  let retries = 0;
+  let retryInterval = 500; // ms
+  let lastRetryTime = Date.now();
+
+  // Retry every 500ms until we hit maxRetries
+  while (retries < maxRetries) {
+    // Wait until 500 ms have passed since the last retry
+    if (Date.now() - lastRetryTime < retryInterval) {
+      continue;
+    }
+    lastRetryTime = Date.now();
+
+    try {
+      const result = await axios<VerificationJob>({
+        method: "GET",
+        url: `${urlByNetwork[network]}/api/class/job/${jobId}`,
+      });
+  
+      if(result.data === null) {
+        throw new Error("Job not found");
+      }
+      if(result.data.status !== VerifyJobStatus.SUBMITTED && result.data.status !== VerifyJobStatus.COMPILED) {
+        return result.data;
+      }
+    } catch (error) {
+      throw new Error(error.response.data.message);
+    }
+
+    retries = retries + 1;
   }
 };

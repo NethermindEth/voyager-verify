@@ -15,7 +15,7 @@ import {
   enterContractToVerify,
   enterContractToVerifyWithValidDependencies,
 } from "./lib/prompts.js";
-import { verifyContractOrClass } from "./lib/requests.js";
+import { dispatchClassVerificationJob, pollVerificationStatus } from "./lib/requests.js";
 import { withSpinner } from "./lib/utils.js";
 
 (async () => {
@@ -50,18 +50,19 @@ import { withSpinner } from "./lib/utils.js";
     }
 
     const contractName: string = await enterContractName(contract);
+    const jobId = await dispatchClassVerificationJob(
+      network,
+      address,
+      version,
+      license,
+      isAccount,
+      contractName,
+      contract,
+      uniqueFiles
+    );
     await withSpinner(
-      "Verifying the contract..",
-      verifyContractOrClass(
-        network,
-        address,
-        version,
-        license,
-        isAccount,
-        contractName,
-        contract,
-        uniqueFiles
-      )
+      "Verifying the contract...",
+      pollVerificationStatus(network, jobId.jobId)
     );
     console.log(
       chalk.green(
