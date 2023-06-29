@@ -84,6 +84,7 @@ export const dispatchClassVerificationJob = async (
 
     return result.data;
   } catch (error) {
+    console.error(error); 
     throw new Error(error.response.data.message || error.response.data);
   }
 };
@@ -116,13 +117,21 @@ export const pollVerificationStatus = async (
       if(result.data === null) {
         throw new Error("Job not found");
       }
-      if(result.data.status !== VerifyJobStatus.SUBMITTED && result.data.status !== VerifyJobStatus.COMPILED) {
+      const status = Number(result.data.status);
+      if(status === VerifyJobStatus.SUCCESS) {
         return result.data;
+      }else if(status === VerifyJobStatus.COMPILE_FAILED) {
+        throw new Error("Compilation failed");
+      }else if(status === VerifyJobStatus.FAIL) {
+        throw new Error("Verification failed");
       }
     } catch (error) {
-      throw new Error(error.response.data.message);
+      console.log(error);
+      throw new Error(`Request failed: ${error.response.data.message}`);
     }
 
     retries = retries + 1;
   }
+  // If we hit maxRetries, throw an timeout error
+  throw new Error("Timeout: Verification job took too long to complete");
 };
