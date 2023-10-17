@@ -4,9 +4,7 @@
 
 ## What is it?
 
-A CLI Verifier Package for **[Voyager](https://voyager.online)**, the block explorer for **Starknet**, on top of our **[GUI Verifier](https://voyager.online/verify)** for better user experience.
-
-![GUI Verify](https://raw.githubusercontent.com/NethermindEth/voyager-verify/master/assets/gui-verify.png)
+A Cairo 0 CLI Verifier Package for **[Voyager](https://voyager.online)**, the block explorer for **Starknet**.
 
 ## Requirements
 - [nodeJs](https://nodejs.org/en/)
